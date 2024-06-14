@@ -9,8 +9,22 @@ permissions:
   contents: read
 
 jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: corepack enable
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: "pnpm"
+      - run: pnpm install
+      - name: Run lint check
+        run: pnpm run lint
+
   autofix:
     runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'push' }}
     steps:
       - uses: actions/checkout@v4
       - run: corepack enable
@@ -21,6 +35,22 @@ jobs:
       - run: pnpm install
       - name: Fix lint issues
         run: pnpm run lint:fix
-      - uses: autofix-ci/action@ea32e3a12414e6d3183163c3424a7d7a8631ad84
+      - uses: stefanzweifel/git-auto-commit-action@v4
         with:
-          commit-message: "chore: apply automated fixes"
+          commit_message: "chore: apply automated fixes"
+          branch: ${{ github.ref }}
+
+  merge:
+    needs: [test, autofix]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Ensure branch is up to date
+        run: |
+          git fetch origin
+          git checkout ${{ github.ref }}
+          git merge origin/main
+      - name: Push changes
+        run: git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
