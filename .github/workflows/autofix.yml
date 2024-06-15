@@ -24,3 +24,28 @@ jobs:
       - uses: autofix-ci/action@ea32e3a12414e6d3183163c3424a7d7a8631ad84
         with:
           commit-message: "chore: apply automated fixes"
+module.exports = {
+  // Define your parser options, env, plugins, etc.
+  parserOptions: {
+    ecmaVersion: 2020,
+    sourceType: 'module',
+  },
+  env: {
+    browser: true,
+    node: true,
+    es6: true,
+  },
+  extends: [
+    'eslint:recommended',
+    'plugin:@typescript-eslint/recommended',
+  ],
+  rules: {
+    // Define your custom rules here
+  },
+  overrides: [
+    {
+      files: ['*.ts', '*.js', '*.mjs', '*.cjs'],
+      // Additional configuration for these file types
+    },
+  ],
+};
